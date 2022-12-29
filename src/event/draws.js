@@ -32,24 +32,11 @@ const initGame = (canvas, ctx) => {
 
   killBricks(bricksData);
 
-  document.addEventListener(
-    "keydown",
-    (e) => {
-      keyDownHandler(paddleData, e);
-    },
-    false
-  );
-  document.addEventListener(
-    "keyup",
-    (e) => {
-      keyUpHandler(paddleData, e);
-    },
-    false
-  );
+  document.addEventListener("keydown", (e) => keyDownHandler(paddleData, e), false);
+  document.addEventListener("keyup", (e) => keyUpHandler(paddleData, e), false);
 
   const pauseGame = () => {
-    // need store last data from pause event execute.
-    // when user continue the game, update pause data into function scoped data
+    // When pause has been executed, need to store last game status to prepare data for update continue event
   };
 
   const resetGame = (interval) => {
@@ -64,10 +51,7 @@ const initGame = (canvas, ctx) => {
     drawPaddle(ctx, canvas, paddleData, paddleX);
     collisionDetection(bricksData, canvasData);
 
-    if (
-      canvasData.posX + canvasData.dx > canvas.width - ballRadius ||
-      canvasData.posX + canvasData.dx < ballRadius
-    ) {
+    if (canvasData.posX + canvasData.dx > canvas.width - ballRadius || canvasData.posX + canvasData.dx < ballRadius) {
       canvasData.dx = -canvasData.dx;
     }
 
@@ -105,9 +89,8 @@ const initGame = (canvas, ctx) => {
   };
 
   const drawBricks = (ctx, bricksData) => {
-    const checkBricks = bricksData.bricks.filter((item) =>
-      item.every((check) => check.status === 0)
-    );
+    const checkBricks = bricksData.bricks.filter((item) => item.every((check) => check.status === 0));
+    // If brick need to be dynamically, array length check need a variable convert detection refs
     if (checkBricks.length === 5) {
       alert("Good Game");
       return resetGame(interval);
@@ -115,10 +98,8 @@ const initGame = (canvas, ctx) => {
     for (let col = 0; col < bricksData.brickColCount; col++) {
       for (let row = 0; row < bricksData.brickRowCount; row++) {
         if (bricksData.bricks[col][row].status === 1) {
-          let brickX =
-            col * (bricksData.brickWidth + bricksData.brickPadding) + bricksData.brickOffsetLeft;
-          let brickY =
-            row * (bricksData.brickHeight + bricksData.brickPadding) + bricksData.brickOffsetTop;
+          let brickX = col * (bricksData.brickWidth + bricksData.brickPadding) + bricksData.brickOffsetLeft;
+          let brickY = row * (bricksData.brickHeight + bricksData.brickPadding) + bricksData.brickOffsetTop;
           bricksData.bricks[col][row].x = brickX;
           bricksData.bricks[col][row].y = brickY;
 
@@ -134,12 +115,7 @@ const initGame = (canvas, ctx) => {
 
   const drawPaddle = (ctx, canvas, paddleData, paddleX) => {
     ctx.beginPath();
-    ctx.rect(
-      paddleX,
-      canvas.height - paddleData.paddleHeight,
-      paddleData.paddleWidth,
-      paddleData.paddleHeight
-    );
+    ctx.rect(paddleX, canvas.height - paddleData.paddleHeight, paddleData.paddleWidth, paddleData.paddleHeight);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();

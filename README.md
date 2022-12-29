@@ -1,7 +1,24 @@
-# Vue 3 + Vite
+## Event Control
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+```
+// src/event
+  actions    // for keyboard event
+  collide    // detection ball collide actions
+  draws      // generate and update web canvas
+  killBricks // eliminate canvas bricks
+```
 
-## Recommended IDE Setup
+## BricksBreaker.vue
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+```js
+  // declare a canvas tag, and set id for 'myCanvas', height, width.
+  // import event modules { initGame }
+  <canvas id="myCanvas" width="480" height="320">
+```
+
+## Dev
+
+```zsh
+  yarn install
+  yarn dev
+```
