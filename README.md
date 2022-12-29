@@ -1,7 +1,7 @@
 ## Event Control
 
 ```
-// src/event
+  // ./src/event
   actions    // for keyboard event
   collide    // detection ball collide actions
   draws      // generate and update web canvas
