@@ -1,4 +1,4 @@
-const killBricks = (bricksData) => {
+const generateBrick = (bricksData) => {
   let { brickColCount, brickRowCount, bricks } = bricksData;
   for (let col = 0; col < brickColCount; col++) {
     bricks[col] = [];
@@ -9,4 +9,4 @@ const killBricks = (bricksData) => {
   return bricks;
 };
 
-export { killBricks };
+export { generateBrick };

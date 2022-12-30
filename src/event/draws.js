@@ -1,9 +1,9 @@
 import { collisionDetection } from "@/event/collide";
-import { killBricks } from "@/event/killBricks";
+import { generateBrick } from "@/event/generateBricks";
 import { keyDownHandler, keyUpHandler } from "@/event/actions";
 
 const initGame = (canvas, ctx) => {
-  let canvasData = {
+  let ballData = {
     posX: canvas.width / 2,
     posY: canvas.height - 30,
     dx: 2,
@@ -30,7 +30,7 @@ const initGame = (canvas, ctx) => {
   let ballRadius = 10;
   let paddleX = (canvas.width - paddleData.paddleWidth) / 2;
 
-  killBricks(bricksData);
+  generateBrick(bricksData);
 
   document.addEventListener("keydown", (e) => keyDownHandler(paddleData, e), false);
   document.addEventListener("keyup", (e) => keyUpHandler(paddleData, e), false);
@@ -45,28 +45,22 @@ const initGame = (canvas, ctx) => {
   };
 
   const draw = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawBall(ctx, canvasData, ballRadius);
-    drawBricks(ctx, bricksData);
-    drawPaddle(ctx, canvas, paddleData, paddleX);
-    collisionDetection(bricksData, canvasData);
-
-    if (canvasData.posX + canvasData.dx > canvas.width - ballRadius || canvasData.posX + canvasData.dx < ballRadius) {
-      canvasData.dx = -canvasData.dx;
+    if (ballData.posX + ballData.dx > canvas.width - ballRadius || ballData.posX + ballData.dx < ballRadius) {
+      ballData.dx = -ballData.dx;
     }
 
-    if (canvasData.posY + canvasData.dy < ballRadius) {
-      canvasData.dy = -canvasData.dy;
+    if (ballData.posY + ballData.dy < ballRadius) {
+      ballData.dy = -ballData.dy;
     }
 
-    if (canvasData.posY + canvasData.dy > canvas.height - ballRadius) {
-      if (canvasData.posX > paddleX && canvasData.posX < paddleX + paddleData.paddleWidth) {
-        if ((canvasData.posY = canvasData.posY - paddleData.paddleHeight)) {
-          canvasData.dy = -canvasData.dy;
+    if (ballData.posY + ballData.dy > canvas.height - ballRadius) {
+      if (ballData.posX > paddleX && ballData.posX < paddleX + paddleData.paddleWidth) {
+        if ((ballData.posY = ballData.posY - paddleData.paddleHeight)) {
+          ballData.dy = -ballData.dy;
         }
       } else {
-        alert("GAME OVER");
-        resetGame(interval);
+        // alert("GAME OVER");
+        // resetGame(interval);
       }
     }
 
@@ -76,13 +70,19 @@ const initGame = (canvas, ctx) => {
       paddleX -= 7;
     }
 
-    canvasData.posX += canvasData.dx;
-    canvasData.posY += canvasData.dy;
+    ballData.posX += ballData.dx;
+    ballData.posY += ballData.dy;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBall(ctx, ballData, ballRadius);
+    drawBricks(ctx, bricksData);
+    drawPaddle(ctx, canvas, paddleData, paddleX);
+    collisionDetection(bricksData, ballData);
   };
 
-  const drawBall = (ctx, canvasData, ballRadius) => {
+  const drawBall = (ctx, ballData, ballRadius) => {
     ctx.beginPath();
-    ctx.arc(canvasData.posX, canvasData.posY, ballRadius, 0, Math.PI * 2);
+    ctx.arc(ballData.posX, ballData.posY, ballRadius, 0, Math.PI * 2);
     ctx.fillStyle = "#0095DD";
     ctx.fill();
     ctx.closePath();
@@ -92,9 +92,12 @@ const initGame = (canvas, ctx) => {
     const checkBricks = bricksData.bricks.filter((item) => item.every((check) => check.status === 0));
     // If brick need to be dynamically, array length check need a variable convert detection refs
     if (checkBricks.length === 5) {
-      alert("Good Game");
+      // alert("Good Game");
       return resetGame(interval);
     }
+
+    // draw by 2 floor array to 
+    // 可以用一層來渲染 (只拿 Columns) 作垂直渲染，此時一個陣列中就只需要一整包 Object 即可
     for (let col = 0; col < bricksData.brickColCount; col++) {
       for (let row = 0; row < bricksData.brickRowCount; row++) {
         if (bricksData.bricks[col][row].status === 1) {
