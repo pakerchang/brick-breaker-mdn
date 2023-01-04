@@ -4,6 +4,7 @@ import { keyDownHandler, keyUpHandler } from "@/event/actions";
 import { updatePosition } from "@/event/updateState";
 
 const initGame = (canvas, ctx) => {
+  let isPause = false;
   let ballData = {
     posX: canvas.width / 2,
     posY: canvas.height - 30,
@@ -35,10 +36,8 @@ const initGame = (canvas, ctx) => {
 
   document.addEventListener("keydown", (e) => keyDownHandler(paddleData, e), false);
   document.addEventListener("keyup", (e) => keyUpHandler(paddleData, e), false);
-
-  const pauseGame = () => {
-    // When pause has been executed, need to store last game status to prepare data for update continue event
-  };
+  document.getElementById("paused").addEventListener("click", (e) => (isPause = true));
+  document.getElementById("start").addEventListener("click", (e) => (isPause = false));
 
   const resetGame = (interval) => {
     clearInterval(interval);
@@ -108,6 +107,8 @@ const initGame = (canvas, ctx) => {
   };
 
   // If want change ball max speed or change game fps, need a variable to control setInterval second attr
-  const interval = setInterval(draw, 10);
+  const interval = setInterval(() => {
+    if (!isPause) draw();
+  }, 10);
 };
 export { initGame };
