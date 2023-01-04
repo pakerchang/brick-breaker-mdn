@@ -1,6 +1,7 @@
 import { collisionDetection } from "@/event/collide";
 import { generateBrick } from "@/event/generateBricks";
 import { keyDownHandler, keyUpHandler } from "@/event/actions";
+import { updateBricks } from "@/event/updateState";
 
 const initGame = (canvas, ctx) => {
   let ballData = {
@@ -30,7 +31,7 @@ const initGame = (canvas, ctx) => {
   let ballRadius = 10;
   let paddleX = (canvas.width - paddleData.paddleWidth) / 2;
 
-  generateBrick(bricksData);
+  bricksData.bricks = generateBrick(bricksData);
 
   document.addEventListener("keydown", (e) => keyDownHandler(paddleData, e), false);
   document.addEventListener("keyup", (e) => keyUpHandler(paddleData, e), false);
@@ -93,24 +94,14 @@ const initGame = (canvas, ctx) => {
     // If brick need to be dynamically, array length check need a variable convert detection refs
     if (checkBricks.length === 5) {
       // alert("Good Game");
-      return resetGame(interval);
+      // return resetGame(interval);
     }
-
-    // draw by 2 floor array to 
     // 可以用一層來渲染 (只拿 Columns) 作垂直渲染，此時一個陣列中就只需要一整包 Object 即可
+    // col has 5, when I use forEach get index to mapping next floors data, I need to add the col index and row index times bricksData width, height
     for (let col = 0; col < bricksData.brickColCount; col++) {
       for (let row = 0; row < bricksData.brickRowCount; row++) {
         if (bricksData.bricks[col][row].status === 1) {
-          let brickX = col * (bricksData.brickWidth + bricksData.brickPadding) + bricksData.brickOffsetLeft;
-          let brickY = row * (bricksData.brickHeight + bricksData.brickPadding) + bricksData.brickOffsetTop;
-          bricksData.bricks[col][row].x = brickX;
-          bricksData.bricks[col][row].y = brickY;
-
-          ctx.beginPath();
-          ctx.rect(brickX, brickY, bricksData.brickWidth, bricksData.brickHeight);
-          ctx.fillStyle = "#0095DD";
-          ctx.fill();
-          ctx.closePath();
+          updateBricks(ctx, bricksData.bricks[col][row], bricksData, col, row);
         }
       }
     }
@@ -125,6 +116,6 @@ const initGame = (canvas, ctx) => {
   };
 
   // If want change ball max speed or change game fps, need a variable to control setInterval second attr
-  const interval = setInterval(draw, 10);
+  const interval = setInterval(draw, 100);
 };
 export { initGame };
