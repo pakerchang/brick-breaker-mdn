@@ -15,7 +15,6 @@ const updatePosition = (ctx, bricksData, updateType, ballData) => {
 const updateBricks = (ctx, singleBrick, bricksData, colIndex, rowIndex) => {
   const { brickWidth, brickHeight, brickPadding, brickOffsetLeft, brickOffsetTop } = bricksData;
   // Still need to fix props data
-  // How to get index of col and row?
   let brickX = colIndex * (brickWidth + brickPadding) + brickOffsetLeft;
   let brickY = rowIndex * (brickHeight + brickPadding) + brickOffsetTop;
 
@@ -31,6 +30,20 @@ const updateBricks = (ctx, singleBrick, bricksData, colIndex, rowIndex) => {
 const updateCollide = (singleBrick, bricksData, ballData) => {
   const { posX, posY } = ballData;
   const { brickWidth, brickHeight } = bricksData;
+  const adjustAngle = (brickData, ballData, brickSize) => {
+    const vertical = brickSize.brickHeight / 2;
+    const horizontal = brickSize.brickWidth / 2; // main
+    const collidePosX = ballData.posX - brickData.x;
+    const collidePosY = ballData.posY - brickData.y;
+
+    const collideHorizontal = collidePosX < horizontal ? "left" : "right";
+    const collideVertical = collidePosY < vertical ? "top" : "bottom";
+
+    // if < 37.5 return minus angle
+    // else return plus angle
+
+    return { collideHorizontal, collideVertical };
+  };
 
   if (
     posX > singleBrick.x &&
@@ -38,10 +51,14 @@ const updateCollide = (singleBrick, bricksData, ballData) => {
     posY > singleBrick.y &&
     posY < singleBrick.y + brickHeight
   ) {
+    const getBallAngle = adjustAngle(singleBrick, ballData, { brickWidth, brickHeight });
+    console.log(getBallAngle);
+
+    // Add brick width position to change ballData's dy
+    // Add a function to handle this
     ballData.dy = -ballData.dy;
     singleBrick.status = 0;
   }
-  return singleBrick;
 };
 
 export { updatePosition, updateBricks, updateCollide };
