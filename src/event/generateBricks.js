@@ -6,8 +6,6 @@ const generateBrick = (bricksData) => {
       bricks[col][row] = { x: 0, y: 0, status: 1 };
     }
   }
-  // const rows = new Array(brickRowCount).fill({ x: 0, y: 0, status: 1 });
-  // bricks = new Array(brickColCount).fill(rows);
   return bricks;
 };
 
