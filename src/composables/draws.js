@@ -92,19 +92,23 @@ class Draws {
     }
 
     if (this.ballData.posY + this.ballData.dy > this.canvas.height - this.ballRadius) {
-      if (this.ballData.posY > this.paddleX && this.ballData.posX < this.paddleX + this.initPaddle.paddleWidth) {
+      if (this.ballData.posX > this.paddleX && this.ballData.posX < this.paddleX + this.initPaddle.paddleWidth) {
         if ((this.ballData.posY = this.ballData.posY - this.initPaddle.paddleHeight)) {
           this.ballData.dy = -this.ballData.dy;
         }
       } else {
         // alert("GAME OVER");
-        this.resetGame();
+        // this.resetGame();
       }
     }
 
     if (this.initPaddle.rightPressed && this.paddleX < this.canvas.width - this.initPaddle.paddleWidth) {
       this.paddleX += 7;
-    } else if (this.initPaddle.leftPressed && this.paddleX > 0) this.paddleX -= 7;
+    } else if (this.initPaddle.leftPressed && this.paddleX > 0) {
+      this.paddleX -= 7;
+    }
+
+    if (this.initBrick.bricks.flat().every((item) => item === 0)) this.resetGame();
 
     this.ballData.posX += this.ballData.dx;
     this.ballData.posY += this.ballData.dy;
@@ -117,15 +121,8 @@ class Draws {
 
   drawBricks(ctx, brickColor, col, row, brickData) {
     const { brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks } = brickData;
-    const checkBricks = bricks.filter((item) => item.every((check) => check.status === 0));
     let brickX = col * (brickWidth + brickPadding) + brickOffsetLeft;
     let brickY = row * (brickHeight + brickPadding) + brickOffsetTop;
-
-    if (checkBricks.length === 5) {
-      // alert("Good Game")
-      return this.resetGame();
-    }
-
     bricks[col][row].x = brickX;
     bricks[col][row].y = brickY;
 
@@ -162,13 +159,21 @@ class Draws {
   updateCollide(col, row, brickData, ballData) {
     const { posX, posY } = ballData;
     const { brickWidth, brickHeight, bricks } = brickData;
-    const posXMaxRange = bricks[col][row].x + brickWidth;
-    const posYMaxRange = bricks[col][row].y + brickHeight;
+    const singleBrick = bricks[col][row];
     let newValue;
-    if (posX > bricks[col][row].x && posX < posXMaxRange && posY < bricks[col][row].y && posYMaxRange) {
+
+    const posXMaxRange = singleBrick.x + brickWidth;
+    const posYMaxRange = singleBrick.y + brickHeight;
+
+    if (
+      posX > singleBrick.x &&
+      posX < singleBrick.x + brickWidth &&
+      posY > singleBrick.y &&
+      posY < singleBrick.y + brickHeight
+    ) {
       // const getBallAngle = adjustAngle();
       // is possiable use getBallAngle data to change ball dy or dx
-      return (newValue = { newDy: (ballData.dy = -ballData.dy), newBrick: (bricks[col][row].status = 0) });
+      return (newValue = { newDy: (ballData.dy = -ballData.dy), newBrick: (singleBrick.status = 0) });
     }
 
     // function adjustAngle() {
