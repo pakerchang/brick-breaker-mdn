@@ -30,6 +30,7 @@ class Draws {
     this.paddleX = (this.canvas.width - this.initPaddle.paddleWidth) / 2;
     this.interval = undefined;
   }
+
   getKeyPressDown(e) {
     if (e.key === "Right" || e.key === "ArrowRight") {
       this.initPaddle.rightPressed = true;
@@ -59,11 +60,20 @@ class Draws {
     clearInterval(this.interval);
     window.location.reload();
   }
-  mappingBrick(fn) {
+
+  mappingBrick(fn, type) {
     for (let col = 0; col < this.initBrick.brickColCount; col++) {
       for (let row = 0; row < this.initBrick.brickRowCount; row++) {
         if (this.initBrick.bricks[col][row].status === 1) {
-          this.initBrick.bricks[col][row] = fn(this.ctx, this.brickColor, col, row, this.initBrick);
+          if (type === "brick")
+            this.initBrick.bricks[col][row] = fn(this.ctx, this.brickColor, col, row, this.initBrick);
+          if (type === "collide") {
+            const result = fn(col, row, this.initBrick, this.ballData);
+            if (result) {
+              this.initBrick.bricks[col][row] = result.newBrick;
+              this.ballData.dy = result.newDy;
+            }
+          }
         }
       }
     }
@@ -88,31 +98,37 @@ class Draws {
         }
       } else {
         // alert("GAME OVER");
-        // this.resetGame();
+        this.resetGame();
       }
     }
+
+    if (this.initPaddle.rightPressed && this.paddleX < this.canvas.width - this.initPaddle.paddleWidth) {
+      this.paddleX += 7;
+    } else if (this.initPaddle.leftPressed && this.paddleX > 0) this.paddleX -= 7;
 
     this.ballData.posX += this.ballData.dx;
     this.ballData.posY += this.ballData.dy;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.mappingBrick(this.drawBricks);
+    this.mappingBrick(this.drawBricks, "brick");
     this.drawPaddle();
     this.drawBall();
+    this.mappingBrick(this.updateCollide, "collide");
   }
 
   drawBricks(ctx, brickColor, col, row, brickData) {
     const { brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks } = brickData;
     const checkBricks = bricks.filter((item) => item.every((check) => check.status === 0));
+    let brickX = col * (brickWidth + brickPadding) + brickOffsetLeft;
+    let brickY = row * (brickHeight + brickPadding) + brickOffsetTop;
 
     if (checkBricks.length === 5) {
       // alert("Good Game")
       return this.resetGame();
     }
-    let brickX = col * (brickWidth + brickPadding) + brickOffsetLeft;
-    let brickY = row * (brickHeight + brickPadding) + brickOffsetTop;
 
     bricks[col][row].x = brickX;
     bricks[col][row].y = brickY;
+
     ctx.beginPath();
     ctx.rect(brickX, brickY, brickWidth, brickHeight);
     ctx.fillStyle = brickColor;
@@ -143,41 +159,40 @@ class Draws {
     this.ctx.closePath();
   }
 
-  updateCollide(singleBrick) {
-    const { posX, posY } = this.ballData;
-    const { brickWidth, brickHeight } = this.initBrick;
-    const posXMaxRange = singleBrick.x + brickWidth;
-    const posYMaxRange = singleBrick.y + brickHeight;
-
-    function adjustAngle() {
-      const vertical = brickHeight / 2;
-      const horizontal = brickWidth / 2;
-      const collidePosX = posX - singleBrick.x;
-      const collidePosY = posY - singleBrick.y;
-
-      const collideHorizontal = collidePosX < horizontal ? "left" : "right";
-      const collideVertical = collidePosY < vertical ? "top" : "bottom";
-
-      return { collideHorizontal, collideVertical };
-    }
-    if (posX > singleBrick.x && posX < posXMaxRange && posY < singleBrick.y && posYMaxRange) {
-      const getBallAngle = adjustAngle();
-      // console.log(getBallAngle);
-      // console.log(this.initBrick.bricks);
-      //
+  updateCollide(col, row, brickData, ballData) {
+    const { posX, posY } = ballData;
+    const { brickWidth, brickHeight, bricks } = brickData;
+    const posXMaxRange = bricks[col][row].x + brickWidth;
+    const posYMaxRange = bricks[col][row].y + brickHeight;
+    let newValue;
+    if (posX > bricks[col][row].x && posX < posXMaxRange && posY < bricks[col][row].y && posYMaxRange) {
+      // const getBallAngle = adjustAngle();
       // is possiable use getBallAngle data to change ball dy or dx
-      this.ballData.dy = -this.ballData.dy;
-      singleBrick.status = 0;
+      return (newValue = { newDy: (ballData.dy = -ballData.dy), newBrick: (bricks[col][row].status = 0) });
     }
+
+    // function adjustAngle() {
+    //   const vertical = brickHeight / 2;
+    //   const horizontal = brickWidth / 2;
+    //   const collidePosX = posX - singleBrick.x;
+    //   const collidePosY = posY - singleBrick.y;
+    //
+    //   const collideHorizontal = collidePosX < horizontal ? "left" : "right";
+    //   const collideVertical = collidePosY < vertical ? "top" : "bottom";
+    //
+    //   return { collideHorizontal, collideVertical };
+    // }
+
+    return newValue;
   }
   initGame() {
     document.addEventListener("keydown", (e) => this.getKeyPressDown(e), false);
     document.addEventListener("keyup", (e) => this.getKeyPressUp(e), false);
-    document.getElementById("paused").addEventListener("click", (e) => (this.isPause = true));
-    document.getElementById("start").addEventListener("click", (e) => (this.isPause = false));
+    document.getElementById("paused").addEventListener("click", () => (this.isPause = true));
+    document.getElementById("start").addEventListener("click", () => (this.isPause = false));
     this.generateBricks();
 
-    return (this.interval = setInterval(() => !this.isPause && this.draw(), 10));
+    this.interval = setInterval(() => !this.isPause && this.draw(), 10);
   }
 }
 

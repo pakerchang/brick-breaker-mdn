@@ -1,6 +1,6 @@
 const updatePosition = (ctx, bricksData, updateType, ballData) => {
   const { brickColCount, brickRowCount } = bricksData;
-  let { bricks } = bricksData;
+  const { bricks } = bricksData;
   for (let col = 0; col < brickColCount; col++) {
     for (let row = 0; row < brickRowCount; row++) {
       if (bricks[col][row].status === 1) {
@@ -19,7 +19,6 @@ const updateBricks = (ctx, singleBrick, bricksData, colIndex, rowIndex) => {
   let brickY = rowIndex * (brickHeight + brickPadding) + brickOffsetTop;
   singleBrick.x = brickX;
   singleBrick.y = brickY;
-  console.log(ctx);
   ctx.beginPath();
   ctx.rect(brickX, brickY, brickWidth, brickHeight);
   ctx.fillStyle = "#0095DD";
