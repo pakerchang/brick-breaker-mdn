@@ -1,7 +1,8 @@
 class Draws {
-  constructor(canvas, ctx) {
-    this.canvas = canvas;
-    this.ctx = ctx;
+  constructor() {
+    this.brickColor = "#0095DD";
+    this.canvas = document.getElementById("myCanvas");
+    this.ctx = this.canvas.getContext("2d");
     this.isPause = false;
     this.ballData = {
       posX: this.canvas.width / 2,
@@ -26,41 +27,46 @@ class Draws {
       bricks: [],
     };
     this.ballRadius = 10;
-    this.paddleX = (canvas.width - paddleData.paddleWidth) / 2;
-    this.interval = setInterval(() => !this.isPause && this.draw(), 10);
+    this.paddleX = (this.canvas.width - this.initPaddle.paddleWidth) / 2;
+    this.interval = undefined;
+  }
+  getKeyPressDown(e) {
+    if (e.key === "Right" || e.key === "ArrowRight") {
+      this.initPaddle.rightPressed = true;
+    } else if (e.key === "Left" || e.key === "ArrowLeft") {
+      this.initPaddle.leftPressed = true;
+    }
   }
 
-  getKeyPressDown() {
-    return document.addEventListener(
-      "keydown",
-      (e) => {
-        if (e.key === "Right" || e.key === "ArrowRight") {
-          this.initPaddle.rightPressed = true;
-        } else if (e.key === "Left" || e.key === "ArrowLeft") {
-          this.isFinite.leftPressed = true;
-        }
-      },
-      false
-    );
+  getKeyPressUp(e) {
+    if (e.key === "Right" || e.key === "ArrowRight") {
+      this.initPaddle.rightPressed = false;
+    } else if (e.key === "Left" || e.key === "ArrowLeft") {
+      this.initPaddle.leftPressed = false;
+    }
   }
 
-  getKeyPressUp() {
-    return document.addEventListener(
-      "keyup",
-      (e) => {
-        if (e.key === "Right" || e.key === "ArrowRight") {
-          this.initPaddle.rightPressed = false;
-        } else if (e.key === "Left" || e.key === "ArrowLeft") {
-          this.isFinite.leftPressed = false;
-        }
-      },
-      false
-    );
+  generateBricks() {
+    for (let col = 0; col < this.initBrick.brickColCount; col++) {
+      this.initBrick.bricks[col] = [];
+      for (let row = 0; row < this.initBrick.brickRowCount; row++) {
+        this.initBrick.bricks[col][row] = { x: 0, y: 0, status: 1 };
+      }
+    }
   }
 
   resetGame() {
     clearInterval(this.interval);
     window.location.reload();
+  }
+  mappingBrick(fn) {
+    for (let col = 0; col < this.initBrick.brickColCount; col++) {
+      for (let row = 0; row < this.initBrick.brickRowCount; row++) {
+        if (this.initBrick.bricks[col][row].status === 1) {
+          this.initBrick.bricks[col][row] = fn(this.ctx, this.brickColor, col, row, this.initBrick);
+        }
+      }
+    }
   }
 
   draw() {
@@ -71,42 +77,55 @@ class Draws {
       this.ballData.dx = -this.ballData.dx;
     }
 
-    if (ballData.posY + this.ballData.dy < this.ballRadius) {
+    if (this.ballData.posY + this.ballData.dy < this.ballRadius) {
       this.ballData.dy = -this.ballData.dy;
     }
+
     if (this.ballData.posY + this.ballData.dy > this.canvas.height - this.ballRadius) {
       if (this.ballData.posY > this.paddleX && this.ballData.posX < this.paddleX + this.initPaddle.paddleWidth) {
         if ((this.ballData.posY = this.ballData.posY - this.initPaddle.paddleHeight)) {
           this.ballData.dy = -this.ballData.dy;
         }
       } else {
-        alert("GAME OVER");
-        resetGame();
+        // alert("GAME OVER");
+        // this.resetGame();
       }
     }
 
     this.ballData.posX += this.ballData.dx;
     this.ballData.posY += this.ballData.dy;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.drawBall(this.ctx, this.ballData, this.ballRadius);
-    this.drawBricks(this.ctx, this.this.initBrick);
-    this.drawPaddle(this.ctx, this.canvas, this.initPaddle, this.paddleX);
-    // collision
+    this.mappingBrick(this.drawBricks);
+    this.drawPaddle();
+    this.drawBall();
   }
 
-  drawBricks() {
-    const checkBricks = this.initBrick.bricks.filter((item) => item.every((check) => check.status === 0));
+  drawBricks(ctx, brickColor, col, row, brickData) {
+    const { brickWidth, brickHeight, brickPadding, brickOffsetTop, brickOffsetLeft, bricks } = brickData;
+    const checkBricks = bricks.filter((item) => item.every((check) => check.status === 0));
 
     if (checkBricks.length === 5) {
-      return resetGame();
+      // alert("Good Game")
+      return this.resetGame();
     }
-    // updatePosition(this.ctx, this.initBrick,"brick")
+    let brickX = col * (brickWidth + brickPadding) + brickOffsetLeft;
+    let brickY = row * (brickHeight + brickPadding) + brickOffsetTop;
+
+    bricks[col][row].x = brickX;
+    bricks[col][row].y = brickY;
+    ctx.beginPath();
+    ctx.rect(brickX, brickY, brickWidth, brickHeight);
+    ctx.fillStyle = brickColor;
+    ctx.closePath();
+    ctx.fill();
+    ctx.closePath();
+    return bricks[col][row];
   }
 
   drawBall() {
     this.ctx.beginPath();
     this.ctx.arc(this.ballData.posX, this.ballData.posY, this.ballRadius, 0, Math.PI * 2);
-    this.ctx = "#0095DD";
+    this.ctx.fillStyle = this.brickColor;
     this.ctx.fill();
     this.ctx.closePath();
   }
@@ -119,20 +138,46 @@ class Draws {
       this.initPaddle.paddleWidth,
       this.initPaddle.paddleHeight
     );
-    this.ctx.fillStyle = "#0095DD";
+    this.ctx.fillStyle = this.brickColor;
     this.ctx.fill();
     this.ctx.closePath();
   }
 
-  updatePosition() {
-    const { brickColCount, brickRowCount, bricks } = this.initBrick;
-    for (let col = 0; col < brickColCount; col++) {
-      for (let row = 0; row < brickRowCount; row++) {
-        if (bricks[col][row].status === 1) {
-          //
-        }
-      }
+  updateCollide(singleBrick) {
+    const { posX, posY } = this.ballData;
+    const { brickWidth, brickHeight } = this.initBrick;
+    const posXMaxRange = singleBrick.x + brickWidth;
+    const posYMaxRange = singleBrick.y + brickHeight;
+
+    function adjustAngle() {
+      const vertical = brickHeight / 2;
+      const horizontal = brickWidth / 2;
+      const collidePosX = posX - singleBrick.x;
+      const collidePosY = posY - singleBrick.y;
+
+      const collideHorizontal = collidePosX < horizontal ? "left" : "right";
+      const collideVertical = collidePosY < vertical ? "top" : "bottom";
+
+      return { collideHorizontal, collideVertical };
     }
+    if (posX > singleBrick.x && posX < posXMaxRange && posY < singleBrick.y && posYMaxRange) {
+      const getBallAngle = adjustAngle();
+      // console.log(getBallAngle);
+      // console.log(this.initBrick.bricks);
+      //
+      // is possiable use getBallAngle data to change ball dy or dx
+      this.ballData.dy = -this.ballData.dy;
+      singleBrick.status = 0;
+    }
+  }
+  initGame() {
+    document.addEventListener("keydown", (e) => this.getKeyPressDown(e), false);
+    document.addEventListener("keyup", (e) => this.getKeyPressUp(e), false);
+    document.getElementById("paused").addEventListener("click", (e) => (this.isPause = true));
+    document.getElementById("start").addEventListener("click", (e) => (this.isPause = false));
+    this.generateBricks();
+
+    return (this.interval = setInterval(() => !this.isPause && this.draw(), 10));
   }
 }
 

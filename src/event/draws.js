@@ -1,5 +1,5 @@
 import { collisionDetection } from "@/event/collide";
-import { generateBrick } from "@/event/generateBricks";
+import { generateBrick } from "@/composables/generateBricks";
 import { keyDownHandler, keyUpHandler } from "@/event/actions";
 import { updatePosition } from "@/event/updateState";
 
@@ -31,7 +31,6 @@ const initGame = (canvas, ctx) => {
   };
   let ballRadius = 10;
   let paddleX = (canvas.width - paddleData.paddleWidth) / 2;
-
   bricksData.bricks = generateBrick(bricksData);
 
   document.addEventListener("keydown", (e) => keyDownHandler(paddleData, e), false);

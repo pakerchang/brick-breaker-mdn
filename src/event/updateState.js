@@ -17,11 +17,11 @@ const updateBricks = (ctx, singleBrick, bricksData, colIndex, rowIndex) => {
   // Still need to fix props data
   let brickX = colIndex * (brickWidth + brickPadding) + brickOffsetLeft;
   let brickY = rowIndex * (brickHeight + brickPadding) + brickOffsetTop;
-
   singleBrick.x = brickX;
   singleBrick.y = brickY;
+  console.log(ctx);
   ctx.beginPath();
-  ctx.rect(brickX, brickY, bricksData.brickWidth, bricksData.brickHeight);
+  ctx.rect(brickX, brickY, brickWidth, brickHeight);
   ctx.fillStyle = "#0095DD";
   ctx.fill();
   ctx.closePath();
@@ -52,7 +52,7 @@ const updateCollide = (singleBrick, bricksData, ballData) => {
     posY < singleBrick.y + brickHeight
   ) {
     const getBallAngle = adjustAngle(singleBrick, ballData, { brickWidth, brickHeight });
-    console.log(getBallAngle);
+    // console.log(getBallAngle);
 
     // Add brick width position to change ballData's dy
     // Add a function to handle this
@@ -61,4 +61,4 @@ const updateCollide = (singleBrick, bricksData, ballData) => {
   }
 };
 
-export { updatePosition, updateBricks, updateCollide };
+export { updatePosition };
