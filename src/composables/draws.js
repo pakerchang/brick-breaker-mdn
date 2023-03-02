@@ -8,7 +8,7 @@ class Draws {
       posX: this.canvas.width / 2,
       posY: this.canvas.height - 30,
       dx: 2,
-      dy: -1,
+      dy: -2,
     };
     this.initPaddle = {
       paddleWidth: 240,
@@ -72,6 +72,7 @@ class Draws {
             if (result) {
               this.initBrick.bricks[col][row] = result.newBrick;
               this.ballData.dy = result.newDy;
+              console.log(this.ballData);
             }
           }
         }
@@ -165,28 +166,23 @@ class Draws {
     const posXMaxRange = singleBrick.x + brickWidth;
     const posYMaxRange = singleBrick.y + brickHeight;
 
-    if (
-      posX > singleBrick.x &&
-      posX < singleBrick.x + brickWidth &&
-      posY > singleBrick.y &&
-      posY < singleBrick.y + brickHeight
-    ) {
-      // const getBallAngle = adjustAngle();
-      // is possiable use getBallAngle data to change ball dy or dx
+    if (posX > singleBrick.x && posX < posXMaxRange && posY > singleBrick.y && posY < posYMaxRange) {
+      adjustAngle();
       return (newValue = { newDy: (ballData.dy = -ballData.dy), newBrick: (singleBrick.status = 0) });
     }
 
-    // function adjustAngle() {
-    //   const vertical = brickHeight / 2;
-    //   const horizontal = brickWidth / 2;
-    //   const collidePosX = posX - singleBrick.x;
-    //   const collidePosY = posY - singleBrick.y;
-    //
-    //   const collideHorizontal = collidePosX < horizontal ? "left" : "right";
-    //   const collideVertical = collidePosY < vertical ? "top" : "bottom";
-    //
-    //   return { collideHorizontal, collideVertical };
-    // }
+    function adjustAngle() {
+      const vertical = brickHeight / 2;
+      const horizontal = brickWidth / 2;
+
+      const collidePosX = posX - singleBrick.x;
+      const collidePosY = posY - singleBrick.y;
+      console.log(collidePosX / 100);
+      const collideHorizontal = collidePosX < horizontal ? "left" : "right";
+      const collideVertical = collidePosY < vertical ? "top" : "bottom";
+
+      return { collideHorizontal, collideVertical };
+    }
 
     return newValue;
   }
